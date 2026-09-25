@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111827">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Central 26</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#111827;--soft:#f0f1f5;--danger:#b91c1c}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text)}
+button,input,textarea{font:inherit}button{cursor:pointer;border:0}.app{min-height:100vh;display:flex;flex-direction:column}
+header{background:#fff;border-bottom:1px solid var(--line);padding:18px 20px;position:sticky;top:0;z-index:5}
+.head{max-width:1100px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-weight:800;font-size:22px}.roommeta{font-size:12px;color:var(--muted)}
+main{width:min(1100px,100%);margin:auto;padding:22px 16px 95px;flex:1}.section{display:none}.section.active{display:block}
+h1,h2,h3{margin:0 0 8px}.sub{color:var(--muted);margin:0 0 18px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+button.primary{background:var(--accent);color:#fff;padding:10px 14px;border-radius:10px}button.secondary{background:var(--soft);color:var(--text);padding:10px 14px;border-radius:10px}button.danger{background:#fee2e2;color:var(--danger);padding:8px 11px;border-radius:9px}
+input,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;outline:none}input:focus,textarea:focus{border-color:#9ca3af}
+.field{margin:10px 0}.small{font-size:12px;color:var(--muted)}.pill{display:inline-flex;padding:5px 9px;border-radius:999px;background:var(--soft);font-size:12px}
+.list{display:flex;flex-direction:column;gap:9px}.item{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid var(--line);padding:12px;border-radius:12px;background:#fff}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);z-index:10}.navin{max-width:760px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr)}
+.nav button{background:#fff;padding:10px 4px;color:var(--muted);font-size:12px}.nav button.active{color:#111827;font-weight:700}.icon{font-size:20px}
+.empty{padding:24px;text-align:center;color:var(--muted);border:1px dashed #d1d5db;border-radius:14px}
+.chat{height:430px;display:flex;flex-direction:column}.messages{flex:1;overflow:auto;padding:8px}.msg{margin:7px 0;max-width:78%;padding:9px 11px;border-radius:12px;background:var(--soft)}.msg.mine{margin-left:auto;background:#111827;color:#fff}.chatbox{display:flex;gap:8px;padding-top:10px}.chatbox input{flex:1}
+.person{display:flex;align-items:center;gap:12px}.avatar{width:38px;height:38px;border-radius:50%;background:#e5e7eb;display:grid;place-items:center;font-weight:700}
+.modalback{position:fixed;inset:0;background:#0006;display:none;align-items:center;justify-content:center;padding:18px;z-index:20}.modal{background:#fff;border-radius:18px;padding:20px;width:min(440px,100%)}
+@media(max-width:600px){header{padding:14px}.brand{font-size:19px}.roommeta{display:none}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="head"><div><div class="brand">Central 26</div><div class="roommeta" id="roomMeta">Private study room • up to 10 people</div></div><span class="pill" id="roomCode">Demo Room</span></div></header>
+
+<main>
+<section id="syllabus" class="section active">
+<h2>Syllabus</h2><p class="sub">Organize your subjects and topics.</p>
+<div class="grid">
+<div class="card"><h3>Add subject</h3><div class="field"><input id="subjectInput" placeholder="Subject name"></div><button class="primary" id="addSubject">Add subject</button></div>
+<div class="card"><h3>Add topic</h3><div class="field"><select id="topicSubject" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:10px"></select></div><div class="field"><input id="topicInput" placeholder="Topic name"></div><button class="primary" id="addTopic">Add topic</button></div>
+</div><div style="height:14px"></div><div id="subjects" class="grid"></div>
+</section>
+
+<section id="videos" class="section">
+<h2>Videos</h2><p class="sub">Share useful lectures and links with the room.</p>
+<div class="card"><div class="grid"><input id="videoTitle" placeholder="Video title"><input id="videoUrl" placeholder="https://..."></div><div style="height:10px"></div><button class="primary" id="addVideo">Add video</button></div>
+<div style="height:14px"></div><div id="videosList" class="list"></div>
+</section>
+
+<section id="chat" class="section">
+<h2>Chat <span id="unread" class="pill" style="display:none">New</span></h2><p class="sub">Room discussion.</p>
+<div class="card chat"><div id="messages" class="messages"></div><form id="chatForm" class="chatbox"><input id="chatInput" placeholder="Write a message..." autocomplete="off"><button class="primary">Send</button></form></div>
+</section>
+
+<section id="people" class="section">
+<h2>People</h2><p class="sub">Room members • maximum 10 people</p>
+<div class="card"><div id="peopleList" class="list"></div></div>
+<div style="height:14px"></div><div class="card"><h3>Join another person</h3><p class="small">UI-only prototype: add a name to simulate a room member.</p><div class="row"><input id="personInput" placeholder="Person's name" style="flex:1;min-width:180px"><button class="primary" id="addPerson">Add person</button></div><div style="height:10px"></div><button class="secondary" id="leaveRoom">Leave room</button></div>
+</section>
+
+<section id="pdf" class="section">
+<h2>PDFs</h2><p class="sub">Upload multiple study PDFs for the room.</p>
+<div class="card"><input id="pdfInput" type="file" accept="application/pdf" multiple><p class="small">Multiple files can be selected at once.</p></div>
+<div style="height:14px"></div><div id="pdfList" class="list"></div>
+</section>
+</main>
+
+<nav class="nav"><div class="navin">
+<button class="active" data-tab="syllabus"><span class="icon">📚</span><br>Syllabus</button>
+<button data-tab="videos"><span class="icon">🎥</span><br>Videos</button>
+<button data-tab="chat"><span class="icon">💬</span><br>Chat</button>
+<button data-tab="people"><span class="icon">👥</span><br>People</button>
+<button data-tab="pdf"><span class="icon">📄</span><br>PDFs</button>
+</div></nav>
+</div>
+
+<div id="modalBack" class="modalback"><div class="modal"><h3 id="modalTitle">Room</h3><p id="modalText"></p><button class="primary" id="closeModal">Close</button></div></div>
+
+<script>
+const state={subjects:[],videos:[],people:["You"],messages:[],pdfs:[]};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function save(){localStorage.setItem("central26_ui",JSON.stringify(state))}
+function load(){try{Object.assign(state,JSON.parse(localStorage.getItem("central26_ui")||"{}"))}catch{};state.subjects ||= [];state.videos ||= [];state.people ||= ["You"];state.messages ||= [];state.pdfs ||= []}
+function renderSubjects(){const box=$("subjects");$("topicSubject").innerHTML=state.subjects.map((s,i)=>`<option value="${i}">${esc(s.name)}</option>`).join("");box.innerHTML=state.subjects.length?state.subjects.map((s,i)=>`<div class="card"><div class="row" style="justify-content:space-between"><h3>${esc(s.name)}</h3><button class="danger" data-rm-sub="${i}">Remove</button></div><div class="list">${s.topics?.length?s.topics.map((t,j)=>`<div class="item"><span>${esc(t)}</span><button class="danger" data-rm-topic="${i},${j}">Remove</button></div>`).join(""):`<div class="empty">No topics yet.</div>`}</div></div>`).join(""):`<div class="empty">No subjects yet. Add your first subject above.</div>`}
+function renderVideos(){$("videosList").innerHTML=state.videos.length?state.videos.map((v,i)=>`<div class="item"><div><b>${esc(v.title)}</b><div class="small">${esc(v.url)}</div></div><button class="danger" data-rm-video="${i}">Remove</button></div>`).join(""):`<div class="empty">No videos or links yet.</div>`}
+function renderPeople(){$("peopleList").innerHTML=state.people.map((p,i)=>`<div class="item"><div class="person"><div class="avatar">${esc(p[0]?.toUpperCase()||"?")}</div><div><b>${esc(p)}</b><div class="small">${i===0?"Room creator":"Room member"}</div></div></div>${i?`<button class="danger" data-rm-person="${i}">Remove</button>`:""}</div>`).join("")}
+function renderMessages(){$("messages").innerHTML=state.messages.map(m=>`<div class="msg ${m.mine?"mine":""}"><b>${esc(m.name)}</b><br>${esc(m.text)}</div>`).join("");$("messages").scrollTop=$("messages").scrollHeight}
+function renderPdfs(){$("pdfList").innerHTML=state.pdfs.length?state.pdfs.map((p,i)=>`<div class="item"><div><b>${esc(p.name)}</b><div class="small">${Math.round(p.size/1024)} KB</div></div><div class="row"><button class="secondary" data-open-pdf="${i}">Open</button><button class="danger" data-rm-pdf="${i}">Remove</button></div></div>`).join(""):`<div class="empty">No PDFs uploaded yet.</div>`}
+function render(){renderSubjects();renderVideos();renderPeople();renderMessages();renderPdfs();save()}
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));$(b.dataset.tab).classList.add("active");if(b.dataset.tab==="chat")$("unread").style.display="none"});
+$("addSubject").onclick=()=>{let n=$("subjectInput").value.trim();if(!n)return;state.subjects.push({name:n,topics:[]});$("subjectInput").value="";render()};
+$("addTopic").onclick=()=>{let i=+$("topicSubject").value,n=$("topicInput").value.trim();if(!n||!state.subjects[i])return;state.subjects[i].topics.push(n);$("topicInput").value="";render()};
+$("addVideo").onclick=()=>{let t=$("videoTitle").value.trim(),u=$("videoUrl").value.trim();if(!t||!u)return;state.videos.push({title:t,url:u});$("videoTitle").value="";$("videoUrl").value="";render()};
+$("addPerson").onclick=()=>{let n=$("personInput").value.trim();if(!n)return;if(state.people.length>=10){alert("This room already has 10 people.");return}state.people.push(n);$("personInput").value="";render()};
+$("leaveRoom").onclick=()=>{if(confirm("Leave this demo room?"))showModal("Leave room","In the UI prototype, this returns to the room entry screen. Backend room/session logic will be added later.")};
+$("chatForm").onsubmit=e=>{e.preventDefault();let t=$("chatInput").value.trim();if(!t)return;state.messages.push({name:"You",text:t,mine:true});$("chatInput").value="";render()};
+$("pdfInput").onchange=e=>{[...e.target.files].forEach(f=>{if(f.type==="application/pdf")state.pdfs.push({name:f.name,size:f.size,url:URL.createObjectURL(f)})});e.target.value="";render()};
+document.addEventListener("click",e=>{let t=e.target;if(t.dataset.rmSub!=null){state.subjects.splice(+t.dataset.rmSub,1);render()}else if(t.dataset.rmTopic){let [i,j]=t.dataset.rmTopic.split(",").map(Number);state.subjects[i].topics.splice(j,1);render()}else if(t.dataset.rmVideo!=null){state.videos.splice(+t.dataset.rmVideo,1);render()}else if(t.dataset.rmPerson!=null){state.people.splice(+t.dataset.rmPerson,1);render()}else if(t.dataset.rmPdf!=null){state.pdfs.splice(+t.dataset.rmPdf,1);render()}else if(t.dataset.openPdf!=null){let p=state.pdfs[+t.dataset.openPdf];if(p?.url)window.open(p.url,"_blank")}});
+
+function showModal(title,text){$("modalTitle").textContent=title;$("modalText").textContent=text;$("modalBack").style.display="flex"}$("closeModal").onclick=()=>$("modalBack").style.display="none";
+load();render();
+</script>
+</body>
+</html>
